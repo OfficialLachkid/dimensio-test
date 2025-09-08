@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>n8n Chatbot Test</title>
+
+  <!-- n8n chat widget styles -->
+  <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+  <style>
+    /* optioneel: een simpele pagina-achtergrond */
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    body { margin: 0; background: #0b1020; color: #f5f7ff; min-height: 100vh; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+    p { opacity: .8; margin: 0 0 24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AI Chatbot via n8n</h1>
+    <p>Deze pagina laadt de @n8n/chat widget en praat met je Chat Trigger workflow.</p>
+    <!--
+      Je kunt de widget "dock"en in een element met de "target" optie.
+      Voeg bijv. hieronder een <div id="chat-slot"></div> en gebruik target: "#chat-slot".
+    -->
+  </div>
+
+  <!-- n8n chat widget script -->
+  <script type="module">
+    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+    createChat({
+      // 👇 jouw Chat Trigger webhook (HTTPS, publiek bereikbaar)
+      webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
+
+      // --- Opties (pas gerust aan) ---
+      // title: 'Supportbot',
+      // subtitle: 'Stel je vraag',
+      // initialMessages: ['Hoi! Waar kan ik mee helpen?'],
+      // theme: 'dark', // of 'light'
+      // target: '#chat-slot', // om te "mounten" in een element i.p.v. floating launcher
+      // position: 'bottom-right', // of 'bottom-left'
+      // inputPlaceholder: 'Typ je bericht...',
+      // persistentHistory: true, // laat de widget gesprekken onthouden (localStorage)
+    });
+  </script>
+</body>
+</html>
