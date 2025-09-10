@@ -3,57 +3,20 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 /* ------------ Config ------------ */
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-const IMG_URL = 'Assets/ChatImage.png'; // zelfde site, Assets/ map
+const IMG_URL = 'Assets/ChatImage.png';
 
-/* ------------ Start widget (volgens docs) ------------ */
+/* ------------ Start widget ------------ */
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
   mode: 'window',
   loadPreviousSession: true,
   defaultLanguage: 'en',
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
-  i18n: {
-    en: {
-      title: TITLE,
-      subtitle: SUBTITLE,
-      inputPlaceholder: 'Typ hier je bericht…',
-    },
-  },
+  i18n: { en: { title: TITLE, subtitle: SUBTITLE, inputPlaceholder: 'Typ hier je bericht…' } },
   enableStreaming: false,
 });
 
-/* ------------ Helpers: Shadow DOM aware query ------------ */
-function queryAllDeep(selectors, root = document) {
-  const results = [];
-  const treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null);
-
-  function tryPush(el) {
-    for (const sel of selectors) {
-      if (el.matches?.(sel)) { results.push(el); break; }
-    }
-    // traverse shadow roots
-    if (el.shadowRoot) {
-      const inner = queryAllDeep(selectors, el.shadowRoot);
-      results.push(...inner);
-    }
-  }
-
-  // check root itself if it's a ShadowRoot or Document
-  if (root.host) {
-    // shadow root
-    Array.from(root.querySelectorAll('*')).forEach(tryPush);
-  } else {
-    // normal document
-    while (treeWalker.nextNode()) tryPush(treeWalker.currentNode);
-  }
-  return results;
-}
-
-function queryDeep(selectors) {
-  return queryAllDeep(selectors)[0] || null;
-}
-
-/* ------------ Find & restyle the launcher button ------------ */
+/* ------------ Shadow-DOM aware finders ------------ */
 const LAUNCHER_SELECTORS = [
   'button.n8n-chat-launcher',
   'button[class*="launcher" i]',
@@ -61,12 +24,24 @@ const LAUNCHER_SELECTORS = [
   'button[aria-label*="open" i]',
 ];
 
+function queryAllDeep(selectors, root = document) {
+  const out = [];
+  // Search in this root
+  for (const sel of selectors) {
+    root.querySelectorAll?.(sel).forEach(el => out.push(el));
+  }
+  // Walk all elements and enter shadow roots
+  (root.querySelectorAll?.('*') || []).forEach(el => {
+    if (el.shadowRoot) out.push(...queryAllDeep(selectors, el.shadowRoot));
+  });
+  return out;
+}
+const queryDeep = selectors => queryAllDeep(selectors)[0] || null;
+
+/* ------------ Style launcher ------------ */
 function styleLauncher(btn) {
-  // maat (werkt samen met CSS in index.html)
   btn.style.width = '80px';
   btn.style.height = '80px';
-
-  // eigen icoon
   btn.style.backgroundImage = `url("${IMG_URL}")`;
   btn.style.backgroundSize = 'contain';
   btn.style.backgroundRepeat = 'no-repeat';
@@ -74,56 +49,47 @@ function styleLauncher(btn) {
   btn.style.backgroundColor = 'transparent';
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
-
-  // standaard binnen-icoon verbergen
-  const innerIcon = btn.querySelector?.('svg, img');
-  if (innerIcon) innerIcon.style.display = 'none';
+  const inner = btn.querySelector?.('svg, img');
+  if (inner) inner.style.display = 'none';
 }
 
-/* ------------ Header titles (optioneel forceren) ------------ */
+/* ------------ Header text (optioneel) ------------ */
 function setHeaderText(rootLike) {
   const root = rootLike?.shadowRoot || rootLike || document;
   const header = root.querySelector?.('.n8n-chat-header, [class*="chat-header" i], header');
   if (!header) return;
-
   const h = header.querySelector?.('h1, h2, [data-title], .title');
   if (h) h.textContent = TITLE;
-
   const sub = header.querySelector?.('p, [data-subtitle], .subtitle');
   if (sub) sub.textContent = SUBTITLE;
 }
 
-/* ------------ Bootstrap / observe DOM ------------ */
+/* ------------ Boot ------------ */
 (function boot() {
   const customBtn = document.getElementById('custom-launcher');
   let realLauncher = null;
 
   function apply() {
-    // 1) Zoek de echte launcher diep in (shadow) DOM
+    // Probeer echte launcher te vinden
     realLauncher = realLauncher || queryDeep(LAUNCHER_SELECTORS);
 
     if (realLauncher) {
-      // a) restyle echte launcher
-      styleLauncher(realLauncher);
-      // b) verberg onze fallback knop
+      // Restyle echte launcher
+      try { styleLauncher(realLauncher); } catch {}
+      // Verberg eigen fallback
       if (customBtn) customBtn.style.display = 'none';
     } else {
-      // Launcher nog niet aanwezig: toon onze eigen knop als fallback
+      // Launcher nog niet/ onbereikbaar → toon fallback
       if (customBtn) customBtn.style.display = 'block';
     }
 
-    // 2) Probeer header-teksten te zetten (zowel light als shadow roots)
-    const containers = [
-      document,
-      document.querySelector('#n8n-chat'),
-      document.querySelector('[class*="chat-container" i]'),
-    ].filter(Boolean);
-    containers.forEach(setHeaderText);
+    // (optioneel) header teksten zetten
+    [document, document.querySelector('#n8n-chat')].filter(Boolean).forEach(setHeaderText);
 
     return Boolean(realLauncher);
   }
 
-  // Fallback-knop klikt door naar de echte launcher zodra die er is
+  // Fallback: click-through naar de echte launcher wanneer mogelijk
   if (customBtn) {
     customBtn.addEventListener('click', () => {
       const btn = realLauncher || queryDeep(LAUNCHER_SELECTORS);
@@ -131,10 +97,8 @@ function setHeaderText(rootLike) {
     });
   }
 
-  // probeer direct
   if (apply()) return;
 
-  // observeer zowel document als body voor mutaties
   const mo = new MutationObserver(() => { if (apply()) mo.disconnect(); });
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
