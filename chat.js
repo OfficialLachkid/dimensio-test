@@ -2,29 +2,33 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-const IMG_URL = 'https://officiallachkid.github.io/dimensio-test/ChatImage.png';
+const IMG_URL = 'ChatImage.png'; // same folder as index.html & chat.js
 
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
 
-  mode: 'window', // or 'fullscreen'
+  /* make the chat usable right away (no “New conversation” button) */
+  showWelcomeScreen: false,
   loadPreviousSession: true,
+
+  /* text & placeholders (some themes read these directly) */
   defaultLanguage: 'en',
-
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
-
   i18n: {
     en: {
       title: TITLE,
       subtitle: SUBTITLE,
       inputPlaceholder: 'Typ hier je bericht…',
-    }
+      getStarted: 'Nieuw gesprek',
+      footer: '', // not rendered, but set empty just in case
+    },
   },
 
-  enableStreaming: false, // set true if your webhook supports streaming
+  /* layout mode can be 'window' or 'fullscreen' */
+  mode: 'window',
 });
 
-/* ---- Style the built-in launcher once it exists ---- */
+/* ---- Find the built-in launcher button ---- */
 function findLauncher() {
   return (
     document.querySelector('button.n8n-chat-launcher') ||
@@ -33,28 +37,29 @@ function findLauncher() {
   );
 }
 
+/* ---- Replace its visuals with your PNG ---- */
 function styleLauncher(btn) {
-  console.log("🎯 Custom chat icon applied!");
+  // size of the circular button (tweak if needed)
+  btn.style.width = '84px';
+  btn.style.height = '84px';
 
-  // Size of the button
-  btn.style.width = '80px';
-  btn.style.height = '80px';
-
-  // Use your custom image
+  // image as background
   btn.style.backgroundImage = `url("${IMG_URL}")`;
   btn.style.backgroundSize = 'contain';
   btn.style.backgroundRepeat = 'no-repeat';
   btn.style.backgroundPosition = 'center';
+
+  // remove default look
   btn.style.backgroundColor = 'transparent';
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
 
-  // Hide default icon
+  // hide any default inner icon (svg/img)
   const innerIcon = btn.querySelector('svg, img');
   if (innerIcon) innerIcon.style.display = 'none';
 }
 
-/* ---- Force header title/subtitle if theme ignores options ---- */
+/* ---- Ensure header texts are applied even if theme ignores i18n ---- */
 function setHeaderText(root) {
   const header = root.querySelector('.n8n-chat-header, [class*="chat-header" i], header');
   if (!header) return;
@@ -66,7 +71,7 @@ function setHeaderText(root) {
   if (sub) sub.textContent = SUBTITLE;
 }
 
-/* Observe DOM for widget mount */
+/* ---- Observe for widget mount and apply tweaks ---- */
 (function boot() {
   const tryNow = () => {
     const btn = findLauncher();
@@ -76,7 +81,6 @@ function setHeaderText(root) {
       document.querySelector('.n8n-chat-container') ||
       document.querySelector('[class*="chat-container" i]') ||
       document.querySelector('[role="dialog"]');
-
     if (panel) setHeaderText(panel);
 
     return !!btn && !!panel;
