@@ -22,8 +22,8 @@ function findLauncher() {
 
 function styleLauncher(btn) {
   // size
-  btn.style.width = '64px';
-  btn.style.height = '64px';
+  btn.style.width = '100px';
+  btn.style.height = '100px';
 
   // replace visuals
   btn.style.backgroundImage = `url("${IMG_URL}")`;
