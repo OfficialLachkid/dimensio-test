@@ -3,7 +3,7 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 /** Teksten / content **/
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-const IMG_URL = 'ChatImage.png'; // zelfde map als index.html & dit bestand
+const IMG_URL = 'Assets/ChatImage.png';
 
 /** Chat initialiseren volgens de documentatie */
 createChat({
