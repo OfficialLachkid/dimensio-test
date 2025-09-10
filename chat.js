@@ -7,11 +7,11 @@ createChat({
 
   // ── Opties die je vaak wilt tweaken ───────────────────────────────────
   // theme: 'dark',            // 'dark' (default) of 'light'
-  // title: 'Supportbot',      // kop bovenin het venster
+  title: 'Supportbot',      // kop bovenin het venster
   // subtitle: 'Stel je vraag',
   // position: 'bottom-right', // of 'bottom-left'
   // inputPlaceholder: 'Typ je bericht…',
-  // initialMessages: ['Hoi! Waar kan ik mee helpen?'],
+  initialMessages: ['Hoi! Waar kan ik mee helpen?'],
   // persistentHistory: true,  // bewaar lokale sessies in de browser
   // target: null,             // laat leeg voor floating popup (aanrader voor test)
   // openByDefault: false,     // true = venster staat direct open bij pageload
