@@ -24,22 +24,23 @@
       body { padding-bottom: 64px; }
     }
 
-    /* Custom chatbot launcher button */
-    .n8n-chat-launcher {
-      background: none !important;     /* verwijder standaard rondje */
-      border: none !important;
-      width: 64px;                     /* pas grootte aan */
-      height: 64px;
-      padding: 0;
-    }
+    /* Verberg de standaard n8n-launcher (we gebruiken onze eigen knop) */
+    .n8n-chat-launcher { display: none !important; }
 
-    .n8n-chat-launcher::before {
-      content: "";
-      display: block;
-      width: 100%;
-      height: 100%;
+    /* Onze eigen launcher-knop met jouw icoon */
+    #my-launcher {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 64px;
+      height: 64px;
       background: url("ChatImage.png") center/contain no-repeat;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      z-index: 2147483647; /* boven alles */
     }
+    #my-launcher:focus { outline: 2px solid #66a3ff; outline-offset: 2px; }
   </style>
 </head>
 <body>
@@ -47,7 +48,10 @@
     <img src="BackgroundImage.png" alt="Dimensio" />
   </div>
 
-  <!-- Laad de chat los via een eigen script (duidelijk & onderhoudbaar) -->
+  <!-- Custom launcher button -->
+  <button id="my-launcher" aria-label="Open chat"></button>
+
+  <!-- Chat init -->
   <script type="module" src="chat.js"></script>
 </body>
 </html>
