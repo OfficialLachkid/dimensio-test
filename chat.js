@@ -22,15 +22,15 @@ function findLauncher() {
 
 function styleLauncher(btn) {
   // size
-  btn.style.width = '100px';
-  btn.style.height = '100px';
+  btn.style.width = '80px';
+  btn.style.height = '80px';
 
   // replace visuals
   btn.style.backgroundImage = `url("${IMG_URL}")`;
   btn.style.backgroundSize = 'contain';
   btn.style.backgroundRepeat = 'no-repeat';
   btn.style.backgroundPosition = 'center';
-  btn.style.backgroundColor = 'transparent';
+  btn.style.backgroundColor = '#fff';
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
 
