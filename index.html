@@ -9,7 +9,7 @@
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
   <style>
-    /* Full-screen image (cover) */
+    /* Achtergrond (optioneel) */
     html, body { height: 100%; margin: 0; }
     body { background: #000; }
     .full { position: fixed; inset: 0; overflow: hidden; }
@@ -19,10 +19,22 @@
       display: block; user-select: none; -webkit-user-drag: none;
     }
 
-    /* Mobile: wat ruimte voor de launcher */
-    @media (max-width: 480px) {
-      body { padding-bottom: 64px; }
+    /* Fallback: eigen launcher (verstopt totdat JS hem nodig heeft) */
+    #custom-launcher {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 80px; height: 80px;
+      background: transparent url("Assets/ChatImage.png") center/contain no-repeat;
+      border: none; border-radius: 50%;
+      box-shadow: none;
+      cursor: pointer;
+      z-index: 2147483000; /* boven de meeste dingen */
+      display: none;       /* JS zet 'm aan als nodig */
     }
+
+    /* Mobiel: ruimte onderin */
+    @media (max-width: 480px) { body { padding-bottom: 72px; } }
   </style>
 </head>
 <body>
@@ -30,7 +42,11 @@
     <img src="BackgroundImage.png" alt="Dimensio" />
   </div>
 
+  <!-- In case we need our own launcher -->
+  <button id="custom-launcher" aria-label="Open chat"></button>
+
   <!-- Chat init -->
-  <script type="module" src="chat.js?v=5"></script>
+  <!-- bump v=… alleen als je chat.js wijzigt (cache-busting) -->
+  <script type="module" src="chat.js?v=7"></script>
 </body>
 </html>
