@@ -3,9 +3,9 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
-  title: 'Supportbot',
+  title: 'Welkom bij Dimensio 👋',
+  subtitle: 'Stel je vraag, we helpen je graag!',
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
-  // keep default floating launcher enabled
 });
 
 const IMG_URL = 'ChatImage.png'; // your custom icon (same folder as index.html)
