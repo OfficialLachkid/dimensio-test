@@ -1,17 +1,27 @@
-// js/chat.js
 import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+const TITLE = 'Welkom bij Dimensio 👋';
+const SUBTITLE = 'Stel je vraag, we helpen je graag!';
+const IMG_URL = 'ChatImage.png'; // same folder as index.html
 
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
-  title: 'Welkom bij Dimensio 👋',
-  subtitle: 'Stel je vraag, we helpen je graag!',
+  title: TITLE,           // some themes use this directly
+  subtitle: SUBTITLE,     // some themes use this directly
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
 });
 
-const IMG_URL = 'ChatImage.png'; // your custom icon (same folder as index.html)
+/* ---- Style the built-in launcher once it exists ---- */
+function findLauncher() {
+  return (
+    document.querySelector('button.n8n-chat-launcher') ||
+    document.querySelector('button[class*="launcher" i]') ||
+    document.querySelector('button[aria-label*="chat" i]')
+  );
+}
 
 function styleLauncher(btn) {
-  // size (adjust if you like)
+  // size
   btn.style.width = '64px';
   btn.style.height = '64px';
 
@@ -24,33 +34,44 @@ function styleLauncher(btn) {
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
 
-  // hide any default icon inside the button (SVG/img)
+  // hide default icon inside
   const innerIcon = btn.querySelector('svg, img');
   if (innerIcon) innerIcon.style.display = 'none';
 }
 
-// robustly locate the built-in launcher after the widget injects it
-function findLauncher() {
-  return (
-    document.querySelector('button.n8n-chat-launcher') ||
-    document.querySelector('button[class*="launcher" i]') ||
-    document.querySelector('button[aria-label*="chat" i]')
-  );
+/* ---- Force header title/subtitle if theme ignores options ---- */
+function setHeaderText(root) {
+  // Try common header containers and headings
+  const header = root.querySelector('.n8n-chat-header, [class*="chat-header" i], header');
+  if (!header) return;
+
+  const h = header.querySelector('h1, h2, [data-title], .title');
+  if (h) h.textContent = TITLE;
+
+  const sub = header.querySelector('p, [data-subtitle], .subtitle');
+  if (sub) sub.textContent = SUBTITLE;
 }
 
-// Try immediately, then watch the DOM until it appears
-(function initLauncherStyling() {
-  const btnNow = findLauncher();
-  if (btnNow) {
-    styleLauncher(btnNow);
-    return;
-  }
-  const mo = new MutationObserver(() => {
+/* Observe DOM for widget mount */
+(function boot() {
+  const tryNow = () => {
     const btn = findLauncher();
-    if (btn) {
-      styleLauncher(btn);
-      mo.disconnect();
-    }
+    if (btn) styleLauncher(btn);
+
+    // Find widget root (panel) and set header text
+    const panel =
+      document.querySelector('.n8n-chat-container') ||
+      document.querySelector('[class*="chat-container" i]') ||
+      document.querySelector('[role="dialog"]');
+    if (panel) setHeaderText(panel);
+
+    return !!btn && !!panel;
+  };
+
+  if (tryNow()) return;
+
+  const mo = new MutationObserver(() => {
+    if (tryNow()) mo.disconnect();
   });
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
