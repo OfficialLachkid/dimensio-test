@@ -2,7 +2,7 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-const IMG_URL = 'ChatImage.png'; // same folder as index.html
+const IMG_URL = 'https://officiallachkid.github.io/dimensio-test/ChatImage.png';
 
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
@@ -21,6 +21,7 @@ function findLauncher() {
 }
 
 function styleLauncher(btn) {
+  console.log("🎯 Custom chat icon applied!");
   // size
   btn.style.width = '80px';
   btn.style.height = '80px';
