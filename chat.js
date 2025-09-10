@@ -6,9 +6,25 @@ const IMG_URL = 'https://officiallachkid.github.io/dimensio-test/ChatImage.png';
 
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
-  title: TITLE,           // some themes use this directly
-  subtitle: SUBTITLE,     // some themes use this directly
+
+  mode: 'window', // or 'fullscreen'
+  showWelcomeScreen: true,
+  loadPreviousSession: true,
+  defaultLanguage: 'en',
+
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
+
+  i18n: {
+    en: {
+      title: TITLE,
+      subtitle: SUBTITLE,
+      inputPlaceholder: 'Typ hier je bericht…',
+      getStarted: 'Nieuw gesprek starten',
+      footer: '',
+    }
+  },
+
+  enableStreaming: false, // set true if your webhook supports streaming
 });
 
 /* ---- Style the built-in launcher once it exists ---- */
@@ -22,27 +38,27 @@ function findLauncher() {
 
 function styleLauncher(btn) {
   console.log("🎯 Custom chat icon applied!");
-  // size
+
+  // Size of the button
   btn.style.width = '80px';
   btn.style.height = '80px';
 
-  // replace visuals
+  // Use your custom image
   btn.style.backgroundImage = `url("${IMG_URL}")`;
   btn.style.backgroundSize = 'contain';
   btn.style.backgroundRepeat = 'no-repeat';
   btn.style.backgroundPosition = 'center';
-  btn.style.backgroundColor = '#fff';
+  btn.style.backgroundColor = 'transparent';
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
 
-  // hide default icon inside
+  // Hide default icon
   const innerIcon = btn.querySelector('svg, img');
   if (innerIcon) innerIcon.style.display = 'none';
 }
 
 /* ---- Force header title/subtitle if theme ignores options ---- */
 function setHeaderText(root) {
-  // Try common header containers and headings
   const header = root.querySelector('.n8n-chat-header, [class*="chat-header" i], header');
   if (!header) return;
 
@@ -59,11 +75,11 @@ function setHeaderText(root) {
     const btn = findLauncher();
     if (btn) styleLauncher(btn);
 
-    // Find widget root (panel) and set header text
     const panel =
       document.querySelector('.n8n-chat-container') ||
       document.querySelector('[class*="chat-container" i]') ||
       document.querySelector('[role="dialog"]');
+
     if (panel) setHeaderText(panel);
 
     return !!btn && !!panel;
