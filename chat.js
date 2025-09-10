@@ -8,7 +8,6 @@ createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
 
   mode: 'window', // or 'fullscreen'
-  showWelcomeScreen: true,
   loadPreviousSession: true,
   defaultLanguage: 'en',
 
