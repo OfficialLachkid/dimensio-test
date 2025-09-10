@@ -2,46 +2,50 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
 
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
-const IMG_URL = 'Assets/ChatImage.png';
+const IMG_URL = 'Assets/chatboticon.png';
 
-/* --- Start widget --- */
+/* 1) Widget starten (zoals in de docs) */
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
   mode: 'window',
+  target: '#n8n-chat',                 // mag ook weg; helpt soms bij mounting
   loadPreviousSession: true,
   defaultLanguage: 'en',
   initialMessages: ['Hoi! Waar kan ik mee helpen?'],
-  i18n: { en: { title: TITLE, subtitle: SUBTITLE, inputPlaceholder: 'Typ hier je bericht…' } },
+  i18n: {
+    en: {
+      title: TITLE,
+      subtitle: SUBTITLE,
+      inputPlaceholder: 'Typ hier je bericht…',
+    },
+  },
   enableStreaming: false,
 });
 
-/* --- Shadow-DOM aware query that IGNORES #custom-launcher --- */
+/* 2) Shadow-DOM veilige zoekfunctie voor de launcher (alleen de echte knop) */
 const LAUNCHER_SELECTORS = [
-  'button.n8n-chat-launcher:not(#custom-launcher)',
-  'button[class*="launcher" i]:not(#custom-launcher)',
-  'button[aria-label*="chat" i]:not(#custom-launcher)',
-  'button[aria-label*="open" i]:not(#custom-launcher)',
+  'button.n8n-chat-launcher',
+  'button[class*="launcher" i]',
+  'button[aria-label*="chat" i]',
+  'button[aria-label*="open" i]',
 ];
 
 function queryAllDeep(selectors, root = document) {
-  const out = [];
+  const found = [];
 
-  // Search in this root
+  // zoek in deze root
   for (const sel of selectors) {
-    (root.querySelectorAll?.(sel) || []).forEach(el => out.push(el));
+    (root.querySelectorAll?.(sel) || []).forEach(el => found.push(el));
   }
 
-  // Walk all elements and enter shadow roots
-  const all = root.querySelectorAll?.('*') || [];
-  for (const el of all) {
-    if (el.shadowRoot) {
-      out.push(...queryAllDeep(selectors, el.shadowRoot));
-    }
-  }
+  // loop alle elementen en ga schaduwwortels in
+  (root.querySelectorAll?.('*') || []).forEach(el => {
+    if (el.shadowRoot) found.push(...queryAllDeep(selectors, el.shadowRoot));
+  });
 
-  // Filter out invisible elements and our own fallback just in case
-  return out.filter(el => {
-    if (el.id === 'custom-launcher') return false;
+  // alleen zichtbare knoppen; sluit eventuele eigen fallback uit
+  return found.filter(el => {
+    if (el.id === 'custom-launcher' || el.id === 'my-fallback-launcher') return false;
     const cs = getComputedStyle(el);
     return cs.display !== 'none' && cs.visibility !== 'hidden';
   });
@@ -49,7 +53,7 @@ function queryAllDeep(selectors, root = document) {
 
 const queryDeep = selectors => queryAllDeep(selectors)[0] || null;
 
-/* --- Style the real launcher --- */
+/* 3) Launcher stylen met jouw PNG */
 function styleLauncher(btn) {
   btn.style.width = '80px';
   btn.style.height = '80px';
@@ -61,11 +65,12 @@ function styleLauncher(btn) {
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
 
+  // standaard icoon verbergen
   const inner = btn.querySelector?.('svg, img');
   if (inner) inner.style.display = 'none';
 }
 
-/* --- Optional: force header texts --- */
+/* 4) (optioneel) Header-teksten forceren als thema ze niet toont */
 function setHeaderText(rootLike) {
   const root = rootLike?.shadowRoot || rootLike || document;
   const header = root.querySelector?.('.n8n-chat-header, [class*="chat-header" i], header');
@@ -78,14 +83,14 @@ function setHeaderText(rootLike) {
   if (sub) sub.textContent = SUBTITLE;
 }
 
-/* --- Boot / observe --- */
+/* 5) Wachten tot de widget/launcher er is en dan stylen */
 (function boot() {
   function apply() {
-    const realLauncher = queryDeep(LAUNCHER_SELECTORS);
-    if (realLauncher) styleLauncher(realLauncher);
+    const btn = queryDeep(LAUNCHER_SELECTORS);
+    if (btn) styleLauncher(btn);
 
     [document, document.querySelector('#n8n-chat')].filter(Boolean).forEach(setHeaderText);
-    return Boolean(realLauncher);
+    return Boolean(btn);
   }
 
   if (apply()) return;

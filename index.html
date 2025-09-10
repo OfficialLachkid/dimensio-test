@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Testsite — Dimensio</title>
 
   <!-- n8n chat widget styles -->
@@ -30,7 +33,10 @@
     <img src="BackgroundImage.png" alt="Dimensio" />
   </div>
 
-  <!-- Chat init -->
-  <script type="module" src="chat.js?v=9"></script>
+  <!-- optioneel: expliciete mount-plek -->
+  <div id="n8n-chat"></div>
+
+  <!-- Chat init (bump v=... als je chat.js wijzigt) -->
+  <script type="module" src="chat.js?v=10"></script>
 </body>
 </html>
