@@ -8,8 +8,30 @@
   <!-- n8n chat widget styles -->
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
+  <!-- Optioneel: kleuren/maat van de widget via de officiële CSS-variabelen -->
   <style>
-    /* Full-screen image (cover) */
+    :root{
+      /* Kleuren van de chat zelf (volgens docs) */
+      --chat--color-primary: #e74266;
+      --chat--color-secondary: #20b69e;
+      --chat--color-dark: #101330;
+      --chat--color-light: #f2f4f8;
+
+      /* Grootte van het chatvenster */
+      --chat--window--width: 360px;
+      --chat--window--height: 560px;
+
+      /* Header-kleuren */
+      --chat--header--background: var(--chat--color-dark);
+      --chat--header--color: var(--chat--color-light);
+
+      /* Launcher (toggle) baseline – we overschrijven straks de visuals met JS */
+      --chat--toggle--size: 80px;                 /* knopmaat */
+      --chat--toggle--background: transparent;    /* transparant, want we gebruiken een afbeelding */
+      --chat--toggle--color: transparent;
+    }
+
+    /* Full-screen achtergrond (optioneel) */
     html, body { height: 100%; margin: 0; }
     body { background: #000; }
     .full { position: fixed; inset: 0; overflow: hidden; }
@@ -21,7 +43,7 @@
 
     /* Mobile: wat ruimte voor de launcher */
     @media (max-width: 480px) {
-      body { padding-bottom: 64px; }
+      body { padding-bottom: 72px; }
     }
   </style>
 </head>
@@ -31,6 +53,7 @@
   </div>
 
   <!-- Chat init -->
-  <script type="module" src="chat.js?v=5"></script>
+  <!-- Tip: bump de v=… alleen als je chat.js wijzigt (cache-busting) -->
+  <script type="module" src="chat.js?v=7"></script>
 </body>
 </html>
