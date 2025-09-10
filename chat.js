@@ -19,8 +19,6 @@ createChat({
       title: TITLE,
       subtitle: SUBTITLE,
       inputPlaceholder: 'Typ hier je bericht…',
-      getStarted: 'Nieuw gesprek starten',
-      footer: '',
     }
   },
 
