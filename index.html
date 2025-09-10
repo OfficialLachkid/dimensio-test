@@ -9,27 +9,20 @@
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
   <style>
-    /* Achtergrond (optioneel) */
+    /* Full-screen image (cover) */
     html, body { height: 100%; margin: 0; }
     body { background: #000; }
     .full { position: fixed; inset: 0; overflow: hidden; }
-    .full > img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
-
-    /* Onze eigen launcher (fallback) */
-    #custom-launcher {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      width: 80px; height: 80px;
-      background: transparent url("Assets/ChatImage.png") center/contain no-repeat;
-      border: none; border-radius: 50%;
-      box-shadow: none;
-      cursor: pointer;
-      z-index: 2147483000;
-      display: none; /* JS zet 'm aan als de echte launcher niet te stylen is */
+    .full > img {
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      display: block; user-select: none; -webkit-user-drag: none;
     }
 
-    @media (max-width: 480px) { body { padding-bottom: 72px; } }
+    /* Mobile: wat ruimte voor de launcher */
+    @media (max-width: 480px) {
+      body { padding-bottom: 64px; }
+    }
   </style>
 </head>
 <body>
@@ -37,10 +30,7 @@
     <img src="BackgroundImage.png" alt="Dimensio" />
   </div>
 
-  <!-- fallback knop -->
-  <button id="custom-launcher" aria-label="Open chat"></button>
-
-  <!-- Cache-bust v=… alleen aanpassen als je chat.js wijzigt -->
+  <!-- Chat init -->
   <script type="module" src="chat.js?v=9"></script>
 </body>
 </html>
