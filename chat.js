@@ -1,11 +1,10 @@
 import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
-/* ------------ Config ------------ */
 const TITLE = 'Welkom bij Dimensio 👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
 const IMG_URL = 'Assets/ChatImage.png';
 
-/* ------------ Start widget ------------ */
+/* --- Start widget --- */
 createChat({
   webhookUrl: 'https://n8n1.vbservices.org/webhook/c5796ce9-6a17-4181-b39c-20108ed3f122/chat',
   mode: 'window',
@@ -16,29 +15,41 @@ createChat({
   enableStreaming: false,
 });
 
-/* ------------ Shadow-DOM aware finders ------------ */
+/* --- Shadow-DOM aware query that IGNORES #custom-launcher --- */
 const LAUNCHER_SELECTORS = [
-  'button.n8n-chat-launcher',
-  'button[class*="launcher" i]',
-  'button[aria-label*="chat" i]',
-  'button[aria-label*="open" i]',
+  'button.n8n-chat-launcher:not(#custom-launcher)',
+  'button[class*="launcher" i]:not(#custom-launcher)',
+  'button[aria-label*="chat" i]:not(#custom-launcher)',
+  'button[aria-label*="open" i]:not(#custom-launcher)',
 ];
 
 function queryAllDeep(selectors, root = document) {
   const out = [];
+
   // Search in this root
   for (const sel of selectors) {
-    root.querySelectorAll?.(sel).forEach(el => out.push(el));
+    (root.querySelectorAll?.(sel) || []).forEach(el => out.push(el));
   }
+
   // Walk all elements and enter shadow roots
-  (root.querySelectorAll?.('*') || []).forEach(el => {
-    if (el.shadowRoot) out.push(...queryAllDeep(selectors, el.shadowRoot));
+  const all = root.querySelectorAll?.('*') || [];
+  for (const el of all) {
+    if (el.shadowRoot) {
+      out.push(...queryAllDeep(selectors, el.shadowRoot));
+    }
+  }
+
+  // Filter out invisible elements and our own fallback just in case
+  return out.filter(el => {
+    if (el.id === 'custom-launcher') return false;
+    const cs = getComputedStyle(el);
+    return cs.display !== 'none' && cs.visibility !== 'hidden';
   });
-  return out;
 }
+
 const queryDeep = selectors => queryAllDeep(selectors)[0] || null;
 
-/* ------------ Style launcher ------------ */
+/* --- Style the real launcher --- */
 function styleLauncher(btn) {
   btn.style.width = '80px';
   btn.style.height = '80px';
@@ -49,52 +60,32 @@ function styleLauncher(btn) {
   btn.style.backgroundColor = 'transparent';
   btn.style.border = 'none';
   btn.style.boxShadow = 'none';
+
   const inner = btn.querySelector?.('svg, img');
   if (inner) inner.style.display = 'none';
 }
 
-/* ------------ Header text (optioneel) ------------ */
+/* --- Optional: force header texts --- */
 function setHeaderText(rootLike) {
   const root = rootLike?.shadowRoot || rootLike || document;
   const header = root.querySelector?.('.n8n-chat-header, [class*="chat-header" i], header');
   if (!header) return;
+
   const h = header.querySelector?.('h1, h2, [data-title], .title');
   if (h) h.textContent = TITLE;
+
   const sub = header.querySelector?.('p, [data-subtitle], .subtitle');
   if (sub) sub.textContent = SUBTITLE;
 }
 
-/* ------------ Boot ------------ */
+/* --- Boot / observe --- */
 (function boot() {
-  const customBtn = document.getElementById('custom-launcher');
-  let realLauncher = null;
-
   function apply() {
-    // Probeer echte launcher te vinden
-    realLauncher = realLauncher || queryDeep(LAUNCHER_SELECTORS);
+    const realLauncher = queryDeep(LAUNCHER_SELECTORS);
+    if (realLauncher) styleLauncher(realLauncher);
 
-    if (realLauncher) {
-      // Restyle echte launcher
-      try { styleLauncher(realLauncher); } catch {}
-      // Verberg eigen fallback
-      if (customBtn) customBtn.style.display = 'none';
-    } else {
-      // Launcher nog niet/ onbereikbaar → toon fallback
-      if (customBtn) customBtn.style.display = 'block';
-    }
-
-    // (optioneel) header teksten zetten
     [document, document.querySelector('#n8n-chat')].filter(Boolean).forEach(setHeaderText);
-
     return Boolean(realLauncher);
-  }
-
-  // Fallback: click-through naar de echte launcher wanneer mogelijk
-  if (customBtn) {
-    customBtn.addEventListener('click', () => {
-      const btn = realLauncher || queryDeep(LAUNCHER_SELECTORS);
-      if (btn) btn.click();
-    });
   }
 
   if (apply()) return;
