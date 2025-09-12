@@ -8,11 +8,11 @@
   <meta http-equiv="Expires" content="0" />
   <title>Testsite — Dimensio</title>
 
-  <!-- n8n chat widget styles -->
+  <!-- n8n chat widget styles (standaard thema/kleuren) -->
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
   <style>
-    /* Full-screen background */
+    /* Full-screen achtergrondafbeelding */
     html, body { height: 100%; margin: 0; }
     body { background: #000; }
     .full { position: fixed; inset: 0; overflow: hidden; }
@@ -22,26 +22,7 @@
       display: block; user-select: none; -webkit-user-drag: none;
     }
 
-    /* n8n widget theming via CSS variables (officieel ondersteund) */
-    :root {
-      /* kleuren */
-      --chat--color-primary: #00a651;            /* Dimensio groen? pas aan naar wens */
-      --chat--color-dark: #101330;
-      --chat--color-white: #ffffff;
-
-      /* afmetingen */
-      --chat--toggle--size: 80px;                /* launcher-bol groter */
-      --chat--window--width: 420px;
-      --chat--window--height: 600px;
-
-      /* header */
-      --chat--header--background: rgba(16,19,48,.92);
-      --chat--header--color: var(--chat--color-white);
-      --chat--heading--font-size: 1.4rem;
-      --chat--subtitle--font-size: 0.95rem;
-    }
-
-    /* Op mobiel wat ruimte zodat de launcher niet over UI heen valt */
+    /* Op mobiel wat ruimte zodat de launcher niet over UI heen valt (optioneel) */
     @media (max-width: 480px) {
       body { padding-bottom: 72px; }
     }
