@@ -10,7 +10,7 @@ createChat({
   initialMessages: ['Hoi! Waar kan ik je mee helpen?'],
   i18n: {
     en: {
-      title: 'Welkom bij Dimensio 👋',
+      title: 'Welkom bij Dimensio Groep👋',
       subtitle: 'Stel je vraag, we helpen je graag!',
       inputPlaceholder: 'Typ hier je bericht…',
       getStarted: 'Nieuw gesprek',
