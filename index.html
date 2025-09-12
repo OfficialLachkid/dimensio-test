@@ -8,7 +8,7 @@
   <meta http-equiv="Expires" content="0" />
   <title>Testsite — Dimensio</title>
 
-  <!-- n8n chat widget styles (standaard thema/kleuren) -->
+  <!-- n8n chat widget styles (default thema/kleuren) -->
   <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
 
   <style>
@@ -22,7 +22,47 @@
       display: block; user-select: none; -webkit-user-drag: none;
     }
 
-    /* Op mobiel wat ruimte zodat de launcher niet over UI heen valt (optioneel) */
+    /* Widget-afmetingen via CSS-variabelen (n8n leest deze) */
+    :root {
+      --chat--window--width: 420px;
+      --chat--window--height: 600px;
+    }
+
+    /* Overlay om muis-events te vangen tijdens resize */
+    .dim-resize-capture {
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      display: none;
+      cursor: default;
+    }
+    .dim-resize-capture.is-active { display: block; }
+
+    /* Onzichtbare resize-handles (we injecteren ze in de chat-window) */
+    .dim-handle {
+      position: absolute;
+      z-index: 2147483647;
+      background: transparent;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    /* linkerrand (W) */
+    .dim-handle-w {
+      top: 0; left: 0; width: 10px; height: 100%;
+      cursor: ew-resize;
+    }
+    /* bovenrand (N) */
+    .dim-handle-n {
+      top: 0; left: 0; width: 100%; height: 10px;
+      cursor: ns-resize;
+    }
+    /* hoek links-boven (NW) */
+    .dim-handle-nw {
+      top: 0; left: 0; width: 18px; height: 18px;
+      cursor: nwse-resize;
+    }
+
+    /* Optioneel: wat ruimte op mobiel */
     @media (max-width: 480px) {
       body { padding-bottom: 72px; }
     }
@@ -36,7 +76,10 @@
   <!-- Mountpunt voor de widget -->
   <div id="n8n-chat"></div>
 
+  <!-- Overlay die muis-events opvangt tijdens resizen -->
+  <div class="dim-resize-capture" id="dim-resize-capture"></div>
+
   <!-- Chat init -->
-  <script type="module" src="chat.js?v=1"></script>
+  <script type="module" src="chat.js?v=3"></script>
 </body>
 </html>
