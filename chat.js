@@ -33,8 +33,6 @@ createChat({
  * Resizable: links (W), boven (N), en hoek links-boven (NW)
  * - We updaten CSS-variabelen:
  *   --chat--window--width / --chat--window--height
- * - n8n plaatst het venster rechtsonder; vergroten via links/boven
- *   groeit dus naar links/boven zonder de positie te verplaatsen.
  * ---------------------------- */
 
 const WINDOW_SELECTORS = [
@@ -73,12 +71,18 @@ function injectHandles(winEl) {
   if (!winEl || winEl.dataset.dimHandles === '1') return;
   winEl.style.position = winEl.style.position || 'fixed';
 
+  // Handles: links (W), boven (N), hoek links-boven (NW)
   const hW = document.createElement('div');
   hW.className = 'dim-handle dim-handle-w';
+  hW.tabIndex = 0;
+
   const hN = document.createElement('div');
   hN.className = 'dim-handle dim-handle-n';
+  hN.tabIndex = 0;
+
   const hNW = document.createElement('div');
   hNW.className = 'dim-handle dim-handle-nw';
+  hNW.tabIndex = 0;
 
   winEl.appendChild(hW);
   winEl.appendChild(hN);
@@ -109,7 +113,7 @@ function injectHandles(winEl) {
       const dx = e.clientX - startX;  // positief = naar rechts
       const dy = e.clientY - startY;  // positief = naar beneden
 
-      // Linker rand (W): naar links slepen (dx negatief) => breedte groter
+      // Linkerrand (W): naar links slepen (dx negatief) => breedte groter
       if (mode.includes('w')) {
         w = startW - dx; // dx negatief => -dx vergroot
         w = clamp(w, MIN_W, maxW());
@@ -136,9 +140,34 @@ function injectHandles(winEl) {
     document.addEventListener('mouseup', onUp);
   }
 
+  // Mouse resize
   hW.addEventListener('mousedown', (e) => startDrag('w', e));
   hN.addEventListener('mousedown', (e) => startDrag('n', e));
   hNW.addEventListener('mousedown', (e) => startDrag('wn', e));
+
+  // Keyboard fallback (optioneel): pijltjes om in kleine stapjes te resizen
+  function keyResize(mode, e) {
+    const STEP = e.shiftKey ? 40 : 12;
+    let w = getVarPx('--chat--window--width', 420);
+    let h = getVarPx('--chat--window--height', 600);
+
+    if (mode.includes('w')) {
+      if (e.key === 'ArrowLeft') w = clamp(w + STEP, MIN_W, maxW()); // alsof je naar links “trekt”
+      if (e.key === 'ArrowRight') w = clamp(w - STEP, MIN_W, maxW());
+    }
+    if (mode.includes('n')) {
+      if (e.key === 'ArrowUp') h = clamp(h + STEP, MIN_H, maxH());
+      if (e.key === 'ArrowDown') h = clamp(h - STEP, MIN_H, maxH());
+    }
+    if (w !== getVarPx('--chat--window--width', w) || h !== getVarPx('--chat--window--height', h)) {
+      setVarPx('--chat--window--width', w);
+      setVarPx('--chat--window--height', h);
+      e.preventDefault();
+    }
+  }
+  hW.addEventListener('keydown', (e) => keyResize('w', e));
+  hN.addEventListener('keydown', (e) => keyResize('n', e));
+  hNW.addEventListener('keydown', (e) => keyResize('wn', e));
 }
 
 function ensureHandles() {

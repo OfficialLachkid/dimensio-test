@@ -38,7 +38,7 @@
     }
     .dim-resize-capture.is-active { display: block; }
 
-    /* Onzichtbare resize-handles (we injecteren ze in de chat-window) */
+    /* Onzichtbare/lichte resize-handles (we injecteren ze in de chat-window) */
     .dim-handle {
       position: absolute;
       z-index: 2147483647;
@@ -56,10 +56,33 @@
       top: 0; left: 0; width: 100%; height: 10px;
       cursor: ns-resize;
     }
-    /* hoek links-boven (NW) */
+    /* hoek links-boven (NW) – met subtiele visuele grip */
     .dim-handle-nw {
       top: 0; left: 0; width: 18px; height: 18px;
       cursor: nwse-resize;
+    }
+    /* De grip zelf: twee diagonale lijntjes (semi-transparant), klik-/dragbaar via de handle. */
+    .dim-handle-nw::after {
+      content: "";
+      position: absolute;
+      left: 3px; top: 3px;
+      width: 12px; height: 12px;
+      opacity: .6; /* subtiel */
+      pointer-events: none; /* laat muis-events door naar de handle */
+      background-repeat: no-repeat;
+      background-size: 12px 12px;
+      /* inline SVG, wit met afgeronde hoeken */
+      background-image: url('data:image/svg+xml;utf8,\
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">\
+<path d="M10.5 1.5 L1.5 10.5 M7.5 1.5 L1.5 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="1"/>\
+</svg>');
+    }
+    .dim-handle-nw:hover::after { opacity: .9; } /* iets duidelijker bij hover */
+
+    /* Toetsenbord focus indicator (toegankelijkheid) */
+    .dim-handle:focus-visible {
+      outline: 2px dashed rgba(255,255,255,.35);
+      outline-offset: 2px;
     }
 
     /* Optioneel: wat ruimte op mobiel */
@@ -80,6 +103,6 @@
   <div class="dim-resize-capture" id="dim-resize-capture"></div>
 
   <!-- Chat init -->
-  <script type="module" src="chat.js?v=3"></script>
+  <script type="module" src="chat.js?v=4"></script>
 </body>
 </html>
