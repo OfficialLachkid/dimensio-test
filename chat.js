@@ -5,6 +5,7 @@ import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bun
  * ---------------------------- */
 const TITLE = 'Welkom bij Dimensio Groep👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
+const WATERMARK_URL = 'Assets/plastic_molecules.png'; // transparante PNG
 
 /* ----------------------------
  * n8n widget init
@@ -30,9 +31,9 @@ createChat({
 });
 
 /* ----------------------------
- * Resizable: links (W), boven (N), en hoek links-boven (NW)
- * - We updaten CSS-variabelen:
- *   --chat--window--width / --chat--window--height
+ * Watermark in chat body (achter de berichten)
+ * - Transparante PNG blijft boven de body-kleur zichtbaar
+ * - Geen invloed op bubbles / interactie
  * ---------------------------- */
 
 const WINDOW_SELECTORS = [
@@ -40,6 +41,56 @@ const WINDOW_SELECTORS = [
   '[class*="chat-window" i]',
   '[data-testid*="chat" i][role="dialog"]',
 ];
+
+const BODY_SELECTORS = [
+  '.n8n-chat-body',
+  '[class*="chat-body" i]',
+  '.n8n-chat-messages',
+  '[class*="messages" i]',
+];
+
+function findChatWindow() {
+  const root = document.querySelector('#n8n-chat') || document;
+  for (const s of WINDOW_SELECTORS) {
+    const el = root.querySelector(s) || document.querySelector(s);
+    if (el) return el;
+  }
+  return null;
+}
+
+function findChatBody(winEl) {
+  if (!winEl) return null;
+  for (const s of BODY_SELECTORS) {
+    const el = winEl.querySelector(s) || document.querySelector(s);
+    if (el) return el;
+  }
+  return null;
+}
+
+function applyWatermark() {
+  const win = findChatWindow();
+  const body = findChatBody(win);
+  if (!body) return false;
+
+  // Zet de afbeelding als background-image. De body-kleur blijft zichtbaar
+  // rondom en door de transparante delen van de PNG.
+  body.style.backgroundImage = `url("${WATERMARK_URL}")`;
+  body.style.backgroundRepeat = 'no-repeat';
+  body.style.backgroundPosition = 'center 72px';   // iets onder de header
+  body.style.backgroundSize = 'min(70%, 520px)';   // responsive, niet te groot
+  body.style.backgroundAttachment = 'local';       // scrolt met de content mee
+
+  // Zorg dat de overlay achter de berichten blijft
+  body.style.backgroundBlendMode = 'normal';
+
+  return true;
+}
+
+/* ----------------------------
+ * Resizable: links (W), boven (N), en hoek links-boven (NW)
+ * - We updaten CSS-variabelen:
+ *   --chat--window--width / --chat--window--height
+ * ---------------------------- */
 
 const MIN_W = 320;
 const MIN_H = 420;
@@ -57,15 +108,6 @@ function setVarPx(name, px) {
 
 function maxW() { return Math.min(1000, Math.floor(window.innerWidth * 0.95)); }
 function maxH() { return Math.min(1000, Math.floor(window.innerHeight * 0.90)); }
-
-function findChatWindow() {
-  const root = document.querySelector('#n8n-chat') || document;
-  for (const s of WINDOW_SELECTORS) {
-    const el = root.querySelector(s) || document.querySelector(s);
-    if (el) return el;
-  }
-  return null;
-}
 
 function injectHandles(winEl) {
   if (!winEl || winEl.dataset.dimHandles === '1') return;
@@ -145,14 +187,14 @@ function injectHandles(winEl) {
   hN.addEventListener('mousedown', (e) => startDrag('n', e));
   hNW.addEventListener('mousedown', (e) => startDrag('wn', e));
 
-  // Keyboard fallback (optioneel): pijltjes om in kleine stapjes te resizen
+  // Keyboard fallback (optioneel)
   function keyResize(mode, e) {
     const STEP = e.shiftKey ? 40 : 12;
     let w = getVarPx('--chat--window--width', 420);
     let h = getVarPx('--chat--window--height', 600);
 
     if (mode.includes('w')) {
-      if (e.key === 'ArrowLeft') w = clamp(w + STEP, MIN_W, maxW()); // alsof je naar links “trekt”
+      if (e.key === 'ArrowLeft') w = clamp(w + STEP, MIN_W, maxW());
       if (e.key === 'ArrowRight') w = clamp(w - STEP, MIN_W, maxW());
     }
     if (mode.includes('n')) {
@@ -170,14 +212,16 @@ function injectHandles(winEl) {
   hNW.addEventListener('keydown', (e) => keyResize('wn', e));
 }
 
-function ensureHandles() {
+/* handles + watermark injecteren zodra de widget er is */
+function ensureEnhancements() {
   const win = findChatWindow();
-  if (win) injectHandles(win);
-  return !!win;
+  if (!win) return false;
+  injectHandles(win);
+  applyWatermark();
+  return true;
 }
-
-if (!ensureHandles()) {
-  const mo = new MutationObserver(() => { if (ensureHandles()) mo.disconnect(); });
+if (!ensureEnhancements()) {
+  const mo = new MutationObserver(() => { if (ensureEnhancements()) mo.disconnect(); });
   mo.observe(document.documentElement, { childList: true, subtree: true });
 }
 
@@ -185,6 +229,11 @@ if (!ensureHandles()) {
 window.addEventListener('resize', () => {
   const w = getVarPx('--chat--window--width', 420);
   const h = getVarPx('--chat--window--height', 600);
-  setVarPx('--chat--window--width', clamp(w, MIN_W, maxW()));
-  setVarPx('--chat--window--height', clamp(h, MIN_H, maxH()));
+  const clampW = clamp(w, MIN_W, maxW());
+  const clampH = clamp(h, MIN_H, maxH());
+  setVarPx('--chat--window--width', clampW);
+  setVarPx('--chat--window--height', clampH);
+
+  // Watermark kan meeschalen met venstergrootte; call nogmaals voor zekerheid
+  applyWatermark();
 });
