@@ -1,7 +1,8 @@
+// chat.js
 import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
 /* ----------------------------
- * Kopteksten (kleuren blijven verder default)
+ * Kopteksten
  * ---------------------------- */
 const TITLE = 'Welkom bij Dimensio Groep👋';
 const SUBTITLE = 'Stel je vraag, we helpen je graag!';
@@ -31,7 +32,7 @@ createChat({
 });
 
 /* ----------------------------
- * Watermark in chat body (achter de berichten)
+ * Watermark in chat body
  * ---------------------------- */
 const WINDOW_SELECTORS = [
   '.n8n-chat-window',
@@ -71,7 +72,7 @@ function applyWatermark() {
 
   body.style.backgroundImage = `url("${WATERMARK_URL}")`;
   body.style.backgroundRepeat = 'no-repeat';
-  body.style.backgroundPosition = 'center 64px';   // net onder compactere header
+  body.style.backgroundPosition = 'center 64px';
   body.style.backgroundSize = 'min(70%, 520px)';
   body.style.backgroundAttachment = 'local';
   body.style.backgroundBlendMode = 'normal';
@@ -80,13 +81,12 @@ function applyWatermark() {
 }
 
 /* ----------------------------
- * Resizable: links (W), boven (N), en hoek links-boven (NW)
+ * Resizable
  * ---------------------------- */
 const MIN_W = 320;
 const MIN_H = 420;
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-
 function getVarPx(name, fallback) {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const n = parseInt(v, 10);
@@ -95,7 +95,6 @@ function getVarPx(name, fallback) {
 function setVarPx(name, px) {
   document.documentElement.style.setProperty(name, `${px}px`);
 }
-
 function maxW() { return Math.min(1000, Math.floor(window.innerWidth * 0.95)); }
 function maxH() { return Math.min(1000, Math.floor(window.innerHeight * 0.90)); }
 
@@ -115,12 +114,11 @@ function injectHandles(winEl) {
   function startDrag(mode, startEvent) {
     startEvent.preventDefault();
 
-    const rect = winEl.getBoundingClientRect();
     const startX = startEvent.clientX;
     const startY = startEvent.clientY;
 
-    const startW = getVarPx('--chat--window--width',  rect.width  || 420);
-    const startH = getVarPx('--chat--window--height', rect.height || 600);
+    const startW = getVarPx('--chat--window--width',  420);
+    const startH = getVarPx('--chat--window--height', 600);
 
     overlay.classList.add('is-active');
     const prevUserSelect = document.body.style.userSelect;
@@ -128,11 +126,11 @@ function injectHandles(winEl) {
 
     function onMove(e) {
       let w = startW, h = startH;
-      const dx = e.clientX - startX;  // + naar rechts
-      const dy = e.clientY - startY;  // + naar beneden
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
 
-      if (mode.includes('w')) { w = clamp(startW - dx, MIN_W, maxW()); } // links slepen
-      if (mode.includes('n')) { h = clamp(startH - dy, MIN_H, maxH()); } // boven slepen
+      if (mode.includes('w')) { w = clamp(startW - dx, MIN_W, maxW()); }
+      if (mode.includes('n')) { h = clamp(startH - dy, MIN_H, maxH()); }
 
       setVarPx('--chat--window--width',  w);
       setVarPx('--chat--window--height', h);
@@ -149,7 +147,6 @@ function injectHandles(winEl) {
     document.addEventListener('mouseup', onUp);
   }
 
-  // Mouse resize
   hW.addEventListener('mousedown',  (e) => startDrag('w',  e));
   hN.addEventListener('mousedown',  (e) => startDrag('n',  e));
   hNW.addEventListener('mousedown', (e) => startDrag('wn', e));
@@ -177,7 +174,6 @@ function injectHandles(winEl) {
   hNW.addEventListener('keydown', (e) => keyResize('wn', e));
 }
 
-/* handles + watermark injecteren zodra de widget er is */
 function ensureEnhancements() {
   const win = findChatWindow();
   if (!win) return false;
@@ -190,7 +186,6 @@ if (!ensureEnhancements()) {
   mo.observe(document.documentElement, { childList: true, subtree: true });
 }
 
-/* Houd maten binnen viewport bij resize van het venster en update watermark */
 window.addEventListener('resize', () => {
   const w = getVarPx('--chat--window--width',  420);
   const h = getVarPx('--chat--window--height', 600);
